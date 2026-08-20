@@ -1,6 +1,19 @@
 """
 Restructure the results + rankings and code for plotting annd graphs
     results: 1 row per (spec, model, cell_line, split, fold, metric)
+    credit: claude for results analysis functions based on outline
+    graphs, plots and funcs to add tomorrow -
+        - TODO: ask how to handle dosage and eval performance - should this be added in as a variable? would need to rerun
+        - model performance of MLP and ridge - tune hyperparams accordingly - TODO: what's the best way to do so? 
+        - performance by cell line
+        - overall highest performing model (absolute %, not compared to mean)
+        - combine performance over cell line
+        - compare performance of combined over individual structural embeddings
+        - compare performance of the three LLMs
+        - change k nearest neighbors to see if performance increases
+        - compare performance of random vs scaffold
+        - TODO: ask more tomorrow
+        
 """
 
 from __future__ import annotations
@@ -14,7 +27,9 @@ METRIC = "pearson_top"
 
 def summary(df: pd.DataFrame | None = None, metric: str = METRIC,
             by: tuple = ("spec", "model")) -> pd.DataFrame:
-    """Mean, sd and a 95% interval over folds/cell lines."""
+    """ 
+    mean, sd and a 95% interval over folds/cell lines.
+    """
     df = load_results() if df is None else df
     sub = df[df["metric"] == metric]
     out = (sub.groupby(list(by))["value"]
@@ -26,17 +41,16 @@ def summary(df: pd.DataFrame | None = None, metric: str = METRIC,
 
 def ranking(df: pd.DataFrame | None = None, model: str = "ridge",
             metric: str = METRIC) -> pd.DataFrame:
-    """Embeddings ranked for one model, with the baselines kept in for reference."""
+    """ embeddings ranked for one model, with the baselines kept in for reference."""
     df = load_results() if df is None else df
     keep = df["model"].isin([model, "mean", "control", "random"])
     return summary(df[keep], metric=metric, by=("spec", "model"))
 
 
 def beats_baseline(df: pd.DataFrame | None = None, metric: str = METRIC) -> pd.DataFrame:
-    """The question that matters: does this embedding beat predicting the mean?
-
-    Compares each (spec, model) against the mean baseline fold-for-fold, so the
-    difference is paired rather than a comparison of two averages.
+    """
+    checks if embedding beats predicting the mean 
+    compares (spec, model) to mean baseline fold-for-fold
     """
     df = load_results() if df is None else df
     sub = df[df["metric"] == metric]
@@ -57,15 +71,17 @@ def beats_baseline(df: pd.DataFrame | None = None, metric: str = METRIC) -> pd.D
 
 
 def by_cell_line(df: pd.DataFrame | None = None, metric: str = METRIC) -> pd.DataFrame:
-    """Wide table: rows are specs, columns are cell lines. Is the ranking stable?"""
+    """ is the ranking stable?"""
     df = load_results() if df is None else df
     s = summary(df, metric=metric, by=("spec", "model", "cell_line"))
     return s.pivot_table(index=["spec", "model"], columns="cell_line", values="mean")
 
 
 def split_gap(df: pd.DataFrame | None = None, metric: str = METRIC) -> pd.DataFrame:
-    """Random-split score minus scaffold-split score. Large gap = the embedding is
-    leaning on scaffold similarity rather than generalising."""
+    """
+    Random-split score minus scaffold-split score. 
+    Large gap = the embedding is leaning on scaffold similarity rather than generalising.
+    """
     df = load_results() if df is None else df
     s = summary(df, metric=metric, by=("spec", "model", "split"))
     wide = s.pivot_table(index=["spec", "model"], columns="split", values="mean")
