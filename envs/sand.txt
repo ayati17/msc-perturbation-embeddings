@@ -1,0 +1,6 @@
+# clone github.com/pfizer-opensource/SAND 
+# use their predefined environment (from their repo's README)
+#   uv sync --extra gpu        (or --extra cpu)
+#   pixi install               (required on H100+, the PyPI faiss wheel has no sm_90 kernels)
+# Then add: 
+# pandas pyarrow  so chemembed.artifacts imports.

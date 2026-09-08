@@ -1,0 +1,8 @@
+numpy
+pandas
+pyarrow
+rdkit
+requests
+anndata
+chembl_webresource_client
+pubchempy

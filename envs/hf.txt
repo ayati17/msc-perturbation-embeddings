@@ -1,0 +1,11 @@
+# Turing sm_75, driver 12.1. cu124 runs on a 12.1 driver via CUDA minor-version
+# compatibility. torch >= 2.6 is required by transformers 5.x to load .bin
+# checkpoints (CVE-2025-32434) - ChemBERTa, SELFormer and ChemGPT are .bin only.
+torch==2.6.0
+transformers==5.15.0
+numpy
+pandas
+pyarrow
+selfies
+sentencepiece
+tqdm
